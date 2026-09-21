@@ -109,9 +109,70 @@ st.caption("선택한 영화의 일관객 수가 시간에 따라 어떻게 증�
 # 앞으로 추가할 그래프 구역
 # ─────────────────────────────────────────────
 st.divider()
-st.header("2. 다음 그래프")
-st.info("다음 시간 관련 그래프를 이 구역에 추가할 예정입니다.")
 
+# ─────────────────────────────────────────────
+# 그래프 2. 기간 내 일관객 합계 TOP 5 영화 비교
+# ─────────────────────────────────────────────
+st.header("2. 일관객 합계 TOP 5 영화의 날짜별 변화")
+
+top5_codes = (
+    df.groupby(["영화코드", "영화명"], as_index=False)["일관객"]
+    .sum()
+    .sort_values("일관객", ascending=False)
+    .head(5)["영화코드"]
+    .tolist()
+)
+
+top5_df = (
+    df[df["영화코드"].isin(top5_codes)]
+    .copy()
+    .sort_values("날짜")
+)
+
+fig2 = px.line(
+    top5_df,
+    x="날짜",
+    y="일관객",
+    color="영화명",
+    markers=False,
+    title="이 기간 일관객 합계가 가장 큰 5편의 날짜별 일관객",
+    labels={
+        "날짜": "날짜",
+        "일관객": "일관객 수",
+        "영화명": "영화",
+    },
+)
+
+fig2.update_traces(
+    hovertemplate="<b>%{x|%Y-%m-%d}</b><br>일관객: %{y:,}명<extra>%{fullData.name}</extra>"
+)
+
+fig2.update_layout(
+    hovermode="x unified",
+    xaxis=dict(
+        tickformat="%Y-%m-%d",
+        title="날짜",
+    ),
+    yaxis=dict(
+        title="일관객 수(명)",
+        tickformat=",",
+    ),
+    legend=dict(
+        title="영화",
+        itemclick="toggle",
+        itemdoubleclick="toggleothers",
+    ),
+    height=550,
+)
+
+st.plotly_chart(fig2, use_container_width=True)
+
+st.markdown("**이 그래프로 알 수 있는 것:** ")
+st.caption("기간 전체에서 일관객 합계가 큰 5편이 날짜별로 어떤 관객 흐름을 보였는지 서로 비교할 수 있습니다.")
+
+# ─────────────────────────────────────────────
+# 앞으로 추가할 그래프 구역
+# ─────────────────────────────────────────────
 st.divider()
 st.header("3. 다음 그래프")
-st.info("추가 그래프를 이 구역에 이어서 구성할 수 있습니다.")
+st.info("추가 시간 관련 그래프를 이 구역에 이어서 구성할 수 있습니다.")
