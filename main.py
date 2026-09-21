@@ -247,7 +247,7 @@ movie_summary = (
     df.groupby(["영화코드", "영화명"], as_index=False)
     .agg(
         기간_일관객=("일관객", "sum"),
-        10위권_등장일수=("날짜", "nunique"),
+        일관객_10위권_등장일수=("날짜", "nunique"),
     )
     .sort_values("기간_일관객", ascending=False)
     .head(10)
@@ -264,7 +264,7 @@ fig4 = px.bar(
         "기간_일관객": "기간 일관객 합계",
         "영화명": "영화",
     },
-    custom_data=["10위권_등장일수"],
+    custom_data=["일관객_10위권_등장일수"],
 )
 
 fig4.update_traces(
