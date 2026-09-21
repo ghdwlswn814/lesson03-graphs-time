@@ -294,8 +294,80 @@ st.markdown("**이 그래프로 알 수 있는 것:** ")
 st.caption("이 기간 동안 누적된 일관객이 가장 많은 영화 10편과 각 영화가 박스오피스 10위권에 등장한 날수를 함께 비교할 수 있습니다.")
 
 # ─────────────────────────────────────────────
+# 그래프 5. 월 × 요일별 일관객 합계 히트맵
+# ─────────────────────────────────────────────
+st.divider()
+st.header("5. 월 × 요일별 일관객 합계")
+
+heatmap_df = df.copy()
+heatmap_df["월"] = heatmap_df["날짜"].dt.month
+
+weekday_map = {
+    0: "월요일",
+    1: "화요일",
+    2: "수요일",
+    3: "목요일",
+    4: "금요일",
+    5: "토요일",
+    6: "일요일",
+}
+heatmap_df["요일"] = heatmap_df["날짜"].dt.weekday.map(weekday_map)
+
+weekday_order = [
+    "월요일", "화요일", "수요일", "목요일",
+    "금요일", "토요일", "일요일"
+]
+
+monthly_weekday = (
+    heatmap_df.groupby(["월", "요일"], as_index=False)["일관객"]
+    .sum()
+)
+
+heatmap_pivot = (
+    monthly_weekday
+    .pivot(index="월", columns="요일", values="일관객")
+    .reindex(columns=weekday_order)
+    .fillna(0)
+)
+
+fig5 = px.imshow(
+    heatmap_pivot,
+    labels={
+        "x": "요일",
+        "y": "월",
+        "color": "일관객 합계",
+    },
+    x=weekday_order,
+    y=[f"{month}월" for month in heatmap_pivot.index],
+    text_auto=".0f",
+    aspect="auto",
+    color_continuous_scale="Blues",
+    title="월 × 요일별 10위권 일관객 합계",
+)
+
+fig5.update_traces(
+    hovertemplate=(
+        "<b>%{y} %{x}</b>"
+        "<br>일관객 합계: %{z:,}명"
+        "<extra></extra>"
+    )
+)
+
+fig5.update_layout(
+    height=600,
+    xaxis=dict(title="요일"),
+    yaxis=dict(title="월"),
+    coloraxis_colorbar=dict(title="일관객 합계"),
+)
+
+st.plotly_chart(fig5, use_container_width=True)
+
+st.markdown("**이 그래프로 알 수 있는 것:** ")
+st.caption("월과 요일에 따라 10위권 영화의 일관객 합계가 어떻게 달라지는지 색의 진하기로 비교할 수 있습니다.")
+
+# ─────────────────────────────────────────────
 # 앞으로 추가할 그래프 구역
 # ─────────────────────────────────────────────
 st.divider()
-st.header("5. 다음 그래프")
+st.header("6. 다음 그래프")
 st.info("추가 시간 관련 그래프를 이 구역에 이어서 구성할 수 있습니다.")
