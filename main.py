@@ -238,8 +238,64 @@ st.markdown("**이 그래프로 알 수 있는 것:** ")
 st.caption("날짜별로 영화 10위권 전체의 관객 규모가 어떻게 변했는지와 관객이 가장 많이 몰린 날을 확인할 수 있습니다.")
 
 # ─────────────────────────────────────────────
+# 그래프 4. 영화별 기간 일관객 TOP 10
+# ─────────────────────────────────────────────
+st.divider()
+st.header("4. 영화별 기간 일관객 TOP 10")
+
+movie_summary = (
+    df.groupby(["영화코드", "영화명"], as_index=False)
+    .agg(
+        기간_일관객=("일관객", "sum"),
+        10위권_등장일수=("날짜", "nunique"),
+    )
+    .sort_values("기간_일관객", ascending=False)
+    .head(10)
+    .sort_values("기간_일관객", ascending=True)
+)
+
+fig4 = px.bar(
+    movie_summary,
+    x="기간_일관객",
+    y="영화명",
+    orientation="h",
+    title="이 기간 일관객 합계 TOP 10",
+    labels={
+        "기간_일관객": "기간 일관객 합계",
+        "영화명": "영화",
+    },
+    custom_data=["10위권_등장일수"],
+)
+
+fig4.update_traces(
+    hovertemplate=(
+        "<b>%{y}</b>"
+        "<br>기간 일관객 합계: %{x:,}명"
+        "<br>10위권에 든 날수: %{customdata[0]}일"
+        "<extra></extra>"
+    )
+)
+
+fig4.update_layout(
+    xaxis=dict(
+        title="기간 일관객 합계(명)",
+        tickformat=",",
+    ),
+    yaxis=dict(
+        title="",
+        categoryorder="total ascending",
+    ),
+    height=600,
+)
+
+st.plotly_chart(fig4, use_container_width=True)
+
+st.markdown("**이 그래프로 알 수 있는 것:** ")
+st.caption("이 기간 동안 누적된 일관객이 가장 많은 영화 10편과 각 영화가 박스오피스 10위권에 등장한 날수를 함께 비교할 수 있습니다.")
+
+# ─────────────────────────────────────────────
 # 앞으로 추가할 그래프 구역
 # ─────────────────────────────────────────────
 st.divider()
-st.header("4. 다음 그래프")
+st.header("5. 다음 그래프")
 st.info("추가 시간 관련 그래프를 이 구역에 이어서 구성할 수 있습니다.")
